@@ -28,6 +28,9 @@ public class QueueScheduler implements Scheduler {
 
     @Override
     public <V> Future<V> apply(LocalDateTime time, Callable<V> callable) {
+        if (!executor.isAlive()) {
+            throw new IllegalStateException("Can't execute task");
+        }
 
         FutureTask<V> futureTask = new FutureTask<>(callable);
         Task<V> task = new Task<>(time, futureTask);
