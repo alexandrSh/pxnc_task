@@ -29,15 +29,15 @@ public class QueueScheduler implements Scheduler {
     @Override
     public <V> Future<V> apply(LocalDateTime time, Callable<V> callable) {
 
-        FutureTask<V> fTask = new FutureTask<>(callable);
-        Task<V> vTask = new Task<>(time, fTask);
+        FutureTask<V> futureTask = new FutureTask<>(callable);
+        Task<V> task = new Task<>(time, futureTask);
 
         synchronized (queue) {
-            queue.add(vTask);
+            queue.add(task);
             queue.notify();
         }
 
-        return fTask;
+        return futureTask;
     }
 
     private class Task<V> implements Comparable<Task<V>> {
@@ -99,7 +99,8 @@ public class QueueScheduler implements Scheduler {
             try {
                 loop();
             } catch (InterruptedException e) {
-//                e.printStackTrace();
+                //thread was broken
+                queue.clear();
             }
         }
 
